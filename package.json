@@ -1,0 +1,22 @@
+{
+  "name": "weixin-js-sdk-beautify",
+  "version": "1.0.0",
+  "description": "人肉反编译 http://res.wx.qq.com/open/js/jweixin-1.0.0.js",
+  "main": "jweixin-1.0.0.beautify.js",
+  "scripts": {
+    "keepup": "rm -f jweixin-1.0.0.js && wget http://res.wx.qq.com/open/js/jweixin-1.0.0.js && js-beautify jweixin-1.0.0.js --outfile jsbeautifier.org.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hbrls/weixin-js-sdk-beautify.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hbrls/weixin-js-sdk-beautify/issues"
+  },
+  "homepage": "https://github.com/hbrls/weixin-js-sdk-beautify",
+  "devDependencies": {
+    "js-beautify": "1.9.1"
+  }
+}
