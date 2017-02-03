@@ -1,5 +1,5 @@
 {
-  "name": "weixin-js-sdk-beautify",
+  "name": "wechat-js-sdk-beautify",
   "version": "1.0.0",
   "description": "人肉反编译 http://res.wx.qq.com/open/js/jweixin-1.0.0.js",
   "main": "jweixin-1.0.0.beautify.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hbrls/weixin-js-sdk-beautify.git"
+    "url": "https://github.com/wechat-developer/wechat-js-sdk-beautify.git"
   },
-  "author": "",
+  "author": "hbrls<shuaizhexu@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hbrls/weixin-js-sdk-beautify/issues"
+    "url": "https://github.com/wechat-developer/wechat-js-sdk-beautify/issues"
   },
-  "homepage": "https://github.com/hbrls/weixin-js-sdk-beautify",
+  "homepage": "https://github.com/wechat-developer/wechat-js-sdk-beautify",
   "devDependencies": {
     "js-beautify": "1.9.1"
   }
