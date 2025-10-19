@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/wechat-developer/wechat-js-sdk-beautify",
   "devDependencies": {
-    "js-beautify": "1.9.1"
+    "js-beautify": "1.5.10"
   }
 }

@@ -6,59 +6,471 @@
   } else {
     initialize(the_global, true);
   }
-}(this, function(a, b) {
-    // a => the_global
-    // b => initialize
-    // ** mapping to `invoke`
-    function c(api_name, conf, conf_of_callback) {
-        a.WeixinJSBridge ? WeixinJSBridge.invoke(api_name, e(conf), function(result) {
-            g(api_name, result, conf_of_callback)
-        }) : j(api_name, conf_of_callback)
-    }
+}(this, function(r, e) {
+    if (!r.jWeixin) {
+        var API_NAMES = { // var c
+            config: "preVerifyJSAPI",
+            onMenuShareTimeline: "menu:share:timeline",
+            onMenuShareAppMessage: "menu:share:appmessage",
+            onMenuShareQQ: "menu:share:qq",
+            onMenuShareWeibo: "menu:share:weiboApp",
+            onMenuShareQZone: "menu:share:QZone",
+            previewImage: "imagePreview",
+            getLocation: "geoLocation",
+            openProductSpecificView: "openProductViewWithPid",
+            addCard: "batchAddCard",
+            openCard: "batchViewCard",
+            chooseWXPay: "getBrandWCPayRequest"
+        };
 
-    // ** mapping to `on`
-    function d(api_name, conf_of_callback, fixme_another_conf) {
-        if (a.WeixinJSBridge) {
-            WeixinJSBridge.on(api_name, function (result) {
-                if (fixme_another_conf && fixme_another_conf.trigger) {
-                    fixme_another_conf.trigger(result);
-                }
-                g(api_name, result, conf_of_callback);
-            });
-        } else {
-            if (fixme_another_conf) {
-                j(api_name, fixme_another_conf);
-            } else {
-                j(api_name, conf_of_callback);
+        var API_NAMES_REVERSE = (function() { // var a
+            var names = {};
+            for (var key in API_NAMES) {
+                names[API_NAMES[key]] = key;
             }
-        }
+            return names;
+        }());
+
+        var i = r.document;
+        var n = i.title;
+
+        var user_agent = navigator.userAgent.toLowerCase();                                   // var t
+        var f = navigator.platform.toLowerCase();
+        var s = !(!f.match("mac") && !f.match("win"));
+        var d = -1 != t.indexOf("wxdebugger");
+        var IS_MICRO_MESSENGER = -1 != user_agent.indexOf("micromessenger");                  // var o
+        var IS_ANDROID = -1 != user_agent.indexOf("android");                                 // var l
+        var IS_IOS = -1 != user_agent.indexOf("iphone") || -1 != user_agent.indexOf("ipad");  // var p
+
+        var client_version = function() {                                                     // var u
+          var a = user_agent.match(/micromessenger\/(\d+\.\d+\.\d+)/) || user_agent.match(/micromessenger\/(\d+\.\d+)/);
+          return a ? a[1] : ""
+        }();
+
+        var g = false;
+        var m = false;
+
+        var h = {
+            initStartTime: now(),
+            initEndTime: 0,
+            preVerifyStartTime: 0,
+            preVerifyEndTime: 0
+        };
+
+        var STATS_INFO = { // var y
+            version: 1,
+            appId: "",
+            initTime: 0,
+            preVerifyTime: 0,
+            networkType: "",
+            preVerifyState: 1,
+            systemType: IS_IOS ? 1 : IS_ANDROID ? 2 : -1,
+            clientVersion: client_version,
+            url: encodeURIComponent(location.href)
+        };
+
+        var CONFIG_COPY = {}; // var S
+
+        var _ = {
+            _completes: []
+        };
+
+        var w = {
+            state: 0,
+            data: {}
+        };
+
+        A(function() {
+            h.initEndTime = now()
+        });
+
+        var I = {
+            config: function(e) {
+                x("config", CONFIG_COPY = e);
+                var o = !1 !== S.check;
+                A(function() {
+                    if (o) T(c.config, {
+                        verifyJsApiList: V(S.jsApiList)
+                    }, (_._complete = function(e) {
+                        h.preVerifyEndTime = b(), w.state = 1, w.data = e
+                    }, _.success = function(e) {
+                        y.preVerifyState = 0
+                    }, _.fail = function(e) {
+                        _._fail ? _._fail(e) : w.state = -1
+                    }, (t = _._completes).push(function() {
+                        0 == y.preVerifyState || s || d || S.debug || u < "6.0.2" || y.systemType < 0 || m || (m = !0, y.appId = S.appId, y.initTime = h.initEndTime - h.initStartTime, y.preVerifyTime = h.preVerifyEndTime - h.preVerifyStartTime, I.getNetworkType({
+                            isInnerInvoke: !0,
+                            success: function(e) {
+                                y.networkType = e.networkType;
+                                e = "http://open.weixin.qq.com/sdk/report?v=" + y.version + "&o=" + y.preVerifyState + "&s=" + y.systemType + "&c=" + y.clientVersion + "&a=" + y.appId + "&n=" + y.networkType + "&i=" + y.initTime + "&p=" + y.preVerifyTime + "&u=" + y.url;
+                                (new Image).src = e
+                            }
+                        }))
+                    }), _.complete = function(e) {
+                        for (var i = 0, n = t.length; i < n; ++i) t[i]();
+                        _._completes = []
+                    }, _)), h.preVerifyStartTime = b();
+                    else {
+                        w.state = 1;
+                        for (var e = _._completes, i = 0, n = e.length; i < n; ++i) e[i]();
+                        _._completes = []
+                    }
+                    var t
+                }), CONFIG_COPY.beta && !I.invoke && (I.invoke = function(e, i, n) {
+                    r.WeixinJSBridge && WeixinJSBridge.invoke(e, k(i), n)
+                }, I.on = function(e, i) {
+                    r.WeixinJSBridge && WeixinJSBridge.on(e, i)
+                })
+            },
+            ready: function(e) {
+                (0 != w.state || (_._completes.push(e), !o && S.debug)) && e()
+            },
+            error: function(e) {
+                u < "6.0.2" || g || (g = !0, -1 == w.state ? e(w.data) : _._fail = e)
+            },
+            checkJsApi: function(e) {
+                T("checkJsApi", {
+                    jsApiList: V(e.jsApiList)
+                }, (e._complete = function(e) {
+                    l && (n = e.checkResult) && (e.checkResult = JSON.parse(n));
+                    var i, n = e,
+                        t = n.checkResult;
+                    for (i in t) {
+                        var o = a[i];
+                        o && (t[o] = t[i], delete t[i])
+                    }
+                }, e))
+            },
+            onMenuShareTimeline: function(e) {
+                v(c.onMenuShareTimeline, {
+                    complete: function() {
+                        T("shareTimeline", {
+                            title: e.title || n,
+                            desc: e.title || n,
+                            img_url: e.imgUrl || "",
+                            link: e.link || location.href,
+                            type: e.type || "link",
+                            data_url: e.dataUrl || ""
+                        }, e)
+                    }
+                }, e)
+            },
+            onMenuShareAppMessage: function(i) {
+                v(c.onMenuShareAppMessage, {
+                    complete: function(e) {
+                        "favorite" === e.scene ? T("sendAppMessage", {
+                            title: i.title || n,
+                            desc: i.desc || "",
+                            link: i.link || location.href,
+                            img_url: i.imgUrl || "",
+                            type: i.type || "link",
+                            data_url: i.dataUrl || ""
+                        }) : T("sendAppMessage", {
+                            title: i.title || n,
+                            desc: i.desc || "",
+                            link: i.link || location.href,
+                            img_url: i.imgUrl || "",
+                            type: i.type || "link",
+                            data_url: i.dataUrl || ""
+                        }, i)
+                    }
+                }, i)
+            },
+            onMenuShareQQ: function(e) {
+                v(c.onMenuShareQQ, {
+                    complete: function() {
+                        T("shareQQ", {
+                            title: e.title || n,
+                            desc: e.desc || "",
+                            img_url: e.imgUrl || "",
+                            link: e.link || location.href
+                        }, e)
+                    }
+                }, e)
+            },
+            onMenuShareWeibo: function(e) {
+                v(c.onMenuShareWeibo, {
+                    complete: function() {
+                        T("shareWeiboApp", {
+                            title: e.title || n,
+                            desc: e.desc || "",
+                            img_url: e.imgUrl || "",
+                            link: e.link || location.href
+                        }, e)
+                    }
+                }, e)
+            },
+            onMenuShareQZone: function(e) {
+                v(c.onMenuShareQZone, {
+                    complete: function() {
+                        T("shareQZone", {
+                            title: e.title || n,
+                            desc: e.desc || "",
+                            img_url: e.imgUrl || "",
+                            link: e.link || location.href
+                        }, e)
+                    }
+                }, e)
+            },
+            startRecord: function(e) {
+                T("startRecord", {}, e)
+            },
+            stopRecord: function(e) {
+                T("stopRecord", {}, e)
+            },
+            onVoiceRecordEnd: function(e) {
+                v("onVoiceRecordEnd", e)
+            },
+            playVoice: function(e) {
+                T("playVoice", {
+                    localId: e.localId
+                }, e)
+            },
+            pauseVoice: function(e) {
+                T("pauseVoice", {
+                    localId: e.localId
+                }, e)
+            },
+            stopVoice: function(e) {
+                T("stopVoice", {
+                    localId: e.localId
+                }, e)
+            },
+            onVoicePlayEnd: function(e) {
+                v("onVoicePlayEnd", e)
+            },
+            uploadVoice: function(e) {
+                T("uploadVoice", {
+                    localId: e.localId,
+                    isShowProgressTips: 0 == e.isShowProgressTips ? 0 : 1
+                }, e)
+            },
+            downloadVoice: function(e) {
+                T("downloadVoice", {
+                    serverId: e.serverId,
+                    isShowProgressTips: 0 == e.isShowProgressTips ? 0 : 1
+                }, e)
+            },
+            translateVoice: function(e) {
+                T("translateVoice", {
+                    localId: e.localId,
+                    isShowProgressTips: 0 == e.isShowProgressTips ? 0 : 1
+                }, e)
+            },
+            chooseImage: function(e) {
+                T("chooseImage", {
+                    scene: "1|2",
+                    count: e.count || 9,
+                    sizeType: e.sizeType || ["original", "compressed"],
+                    sourceType: e.sourceType || ["album", "camera"]
+                }, (e._complete = function(e) {
+                    if (l) {
+                        var i = e.localIds;
+                        try {
+                            i && (e.localIds = JSON.parse(i))
+                        } catch (e) {}
+                    }
+                }, e))
+            },
+            previewImage: function(e) {
+                T(c.previewImage, {
+                    current: e.current,
+                    urls: e.urls
+                }, e)
+            },
+            uploadImage: function(e) {
+                T("uploadImage", {
+                    localId: e.localId,
+                    isShowProgressTips: 0 == e.isShowProgressTips ? 0 : 1
+                }, e)
+            },
+            downloadImage: function(e) {
+                T("downloadImage", {
+                    serverId: e.serverId,
+                    isShowProgressTips: 0 == e.isShowProgressTips ? 0 : 1
+                }, e)
+            },
+            getNetworkType: function(e) {
+                T("getNetworkType", {}, (e._complete = function(e) {
+                    var i = e,
+                        e = i.errMsg,
+                        n = (i.errMsg = "getNetworkType:ok", i.subtype);
+                    if (delete i.subtype, n) i.networkType = n;
+                    else {
+                        var n = e.indexOf(":"),
+                            t = e.substring(n + 1);
+                        switch (t) {
+                            case "wifi":
+                            case "edge":
+                            case "wwan":
+                                i.networkType = t;
+                                break;
+                            default:
+                                i.errMsg = "getNetworkType:fail"
+                        }
+                    }
+                }, e))
+            },
+            openLocation: function(e) {
+                T("openLocation", {
+                    latitude: e.latitude,
+                    longitude: e.longitude,
+                    name: e.name || "",
+                    address: e.address || "",
+                    scale: e.scale || 28,
+                    infoUrl: e.infoUrl || ""
+                }, e)
+            },
+            getLocation: function(e) {
+                e = e || {}, T(c.getLocation, {
+                    type: e.type || "wgs84"
+                }, (e._complete = function(e) {
+                    delete e.type
+                }, e))
+            },
+            hideOptionMenu: function(e) {
+                T("hideOptionMenu", {}, e)
+            },
+            showOptionMenu: function(e) {
+                T("showOptionMenu", {}, e)
+            },
+            closeWindow: function(e) {
+                T("closeWindow", {}, e = e || {})
+            },
+            hideMenuItems: function(e) {
+                T("hideMenuItems", {
+                    menuList: e.menuList
+                }, e)
+            },
+            showMenuItems: function(e) {
+                T("showMenuItems", {
+                    menuList: e.menuList
+                }, e)
+            },
+            hideAllNonBaseMenuItem: function(e) {
+                T("hideAllNonBaseMenuItem", {}, e)
+            },
+            showAllNonBaseMenuItem: function(e) {
+                T("showAllNonBaseMenuItem", {}, e)
+            },
+            scanQRCode: function(e) {
+                T("scanQRCode", {
+                    needResult: (e = e || {}).needResult || 0,
+                    scanType: e.scanType || ["qrCode", "barCode"]
+                }, (e._complete = function(e) {
+                    var i;
+                    p && (i = e.resultStr) && (i = JSON.parse(i), e.resultStr = i && i.scan_code && i.scan_code.scan_result)
+                }, e))
+            },
+            openProductSpecificView: function(e) {
+                T(c.openProductSpecificView, {
+                    pid: e.productId,
+                    view_type: e.viewType || 0,
+                    ext_info: e.extInfo
+                }, e)
+            },
+            addCard: function(e) {
+                for (var i = e.cardList, n = [], t = 0, o = i.length; t < o; ++t) {
+                    var r = i[t],
+                        r = {
+                            card_id: r.cardId,
+                            card_ext: r.cardExt
+                        };
+                    n.push(r)
+                }
+                T(c.addCard, {
+                    card_list: n
+                }, (e._complete = function(e) {
+                    if (i = e.card_list) {
+                        for (var i, n = 0, t = (i = JSON.parse(i)).length; n < t; ++n) {
+                            var o = i[n];
+                            o.cardId = o.card_id, o.cardExt = o.card_ext, o.isSuccess = !!o.is_succ, delete o.card_id, delete o.card_ext, delete o.is_succ
+                        }
+                        e.cardList = i, delete e.card_list
+                    }
+                }, e))
+            },
+            chooseCard: function(e) {
+                T("chooseCard", {
+                    app_id: S.appId,
+                    location_id: e.shopId || "",
+                    sign_type: e.signType || "SHA1",
+                    card_id: e.cardId || "",
+                    card_type: e.cardType || "",
+                    card_sign: e.cardSign,
+                    time_stamp: e.timestamp + "",
+                    nonce_str: e.nonceStr
+                }, (e._complete = function(e) {
+                    e.cardList = e.choose_card_info, delete e.choose_card_info
+                }, e))
+            },
+            openCard: function(e) {
+                for (var i = e.cardList, n = [], t = 0, o = i.length; t < o; ++t) {
+                    var r = i[t],
+                        r = {
+                            card_id: r.cardId,
+                            code: r.code
+                        };
+                    n.push(r)
+                }
+                T(c.openCard, {
+                    card_list: n
+                }, e)
+            },
+            chooseWXPay: function(e) {
+                T(c.chooseWXPay, {
+                    timeStamp: e.timestamp + "",
+                    nonceStr: e.nonceStr,
+                    package: e.package,
+                    paySign: e.paySign,
+                    signType: e.signType || "SHA1"
+                }, e)
+            }
+        };
+        
+        e && (r.wx = r.jWeixin = I);
+        
+        return I;
     }
 
-    function e(conf) {
-        conf = conf || {};
-
-        conf.appId = CONFIG_COPY.appId;
-        conf.verifyAppId = CONFIG_COPY.appId;
-        conf.verifySignType = "sha1";
-        conf.verifyTimestamp = CONFIG_COPY.timestamp + "",
-        conf.verifyNonceStr = CONFIG_COPY.nonceStr,
-        conf.verifySignature = CONFIG_COPY.signature
-
-        return conf;
+    function T(api_name, conf, conf_of_callback) {
+        r.WeixinJSBridge ? WeixinJSBridge.invoke(api_name, e(conf), function(result) {
+            M(api_name, result, conf_of_callback)
+        }) : x(api_name, conf_of_callback)
     }
 
-    function f(a) {
-        return {
-            timeStamp: a.timestamp + "",
-            nonceStr: a.nonceStr,
-            "package": a.package,
-            paySign: a.paySign,
-            signType: a.signType || "SHA1"
+    function v(i, n, t) {
+        r.WeixinJSBridge ? WeixinJSBridge.on(i, function(e) {
+            t && t.trigger && t.trigger(e), M(i, e, n)
+        }) : x(i, t || n)
+    }
+
+    function k(e) {
+        return (e = e || {}).appId = S.appId, e.verifyAppId = S.appId, e.verifySignType = "sha1", e.verifyTimestamp = S.timestamp + "", e.verifyNonceStr = S.nonceStr, e.verifySignature = S.signature, e
+    }
+
+    function M(e, i, n) {
+        delete i.err_code, delete i.err_desc, delete i.err_detail;
+        var t = i.errMsg,
+            e = (t || (t = i.err_msg, delete i.err_msg, t = ((e, i) => {
+                var n, t = a[e];
+                return t && (e = t), t = "ok", i && (n = i.indexOf(":"), "access denied" != (t = (t = (t = -1 != (t = -1 != (t = "failed" == (t = "confirm" == (t = i.substring(n + 1)) ? "ok" : t) ? "fail" : t).indexOf("failed_") ? t.substring(7) : t).indexOf("fail_") ? t.substring(5) : t).replace(/_/g, " ")).toLowerCase()) && "no permission to execute" != t || (t = "permission denied"), "" == (t = "config" == e && "function not exist" == t ? "ok" : t)) && (t = "fail"), i = e + ":" + t
+            })(e, t), i.errMsg = t), (n = n || {})._complete && (n._complete(i), delete n._complete), t = i.errMsg || "", S.debug && !n.isInnerInvoke && alert(JSON.stringify(i)), t.indexOf(":"));
+        switch (t.substring(e + 1)) {
+            case "ok":
+                n.success && n.success(i);
+                break;
+            case "cancel":
+                n.cancel && n.cancel(i);
+                break;
+            default:
+                n.fail && n.fail(i)
         }
+        n.complete && n.complete(i)
     }
 
     // api_name, result, conf_of_callback
-    function g(a, bridge_result, c) {
+    function M(a, bridge_result, c) {
         delete bridge_result.err_code;
         delete bridge_result.err_desc;
         delete bridge_result.err_detail;
@@ -108,99 +520,21 @@
         }
     }
 
-    function h(apiName, errMsg) {
-        var api = apiName;
-
-        if (apiName in API_NAMES_REVERSE) {
-          api = API_NAMES_REVERSE[apiName];
-        }
-
-        var e = 'ok';
-
-        if (errMsg) {
-          e = errMsg.substring(errMsg.indexOf(':') + 1);
-
-          if (e === 'confirm') {
-            e = 'ok';
-          }
-
-          if (e === 'failed') {
-            e = 'fail';
-          }
-
-          if (e.indexOf("failed_") > -1) {
-            e = e.substring(7);
-          }
-
-          if (e.indexOf("fail_") > -1) {
-            e = e.substring(5)
-          }
-
-          e = e.replace(/_/g, " ");
-
-          e = e.toLowerCase();
-
-          if (e === 'access denied' || e === 'no permission to execute') {
-            e = 'permission denied';
-          }
-
-          if (api === 'config' && e === 'function not exist') {
-            e = 'ok';
-          }
-
-          if (e === '') {
-            e = 'fail';
-          }
-        }
-
-        errMsg = api + ':' + e;
-
-        return errMsg;
-    }
-
-    function i(a) {
-        var b, c, d, e;
-        if (a) {
-            for (b = 0, c = a.length; c > b; ++b) d = a[b], e = API_NAMES[d], e && (a[b] = e);
-            return a
-        }
-    }
-
-    function j(a, b) {
-        if (!(!CONFIG_COPY.debug || b && b.isInnerInvoke)) {
-            var c = API_NAMES_REVERSE[a];
-            c && (a = c), b && b._complete && delete b._complete, console.log('"' + a + '",', b || "")
-        }
-    }
-
-    // ** big data for Tecnet, not for you
-    function statsReport() {
-        if (STATS_INFO.preVerifyState) {
-            if (u || v || E.debug || "6.0.2" > z || STATS_INFO.systemType < 0 || A) {
-                // pass
-            } else {
-                A = true;
-                STATS_INFO.appId = E.appId;
-                STATS_INFO.initTime = C.initEndTime - C.initStartTime;
-                STATS_INFO.preVerifyTime = C.preVerifyEndTime - C.preVerifyStartTime;
-                H.getNetworkType({
-                   isInnerInvoke: true,
-                   success: function (a) {
-                       STATS_INFO.networkType = a.networkType;
-                       var src = "http://open.weixin.qq.com/sdk/report?v=" + STATS_INFO.version
-                               + "&o=" + STATS_INFO.preVerifyState
-                               + "&s=" + STATS_INFO.systemType
-                               + "&c=" + STATS_INFO.clientVersion
-                               + "&a=" + STATS_INFO.appId
-                               + "&n=" + STATS_INFO.networkType
-                               + "&i=" + STATS_INFO.initTime
-                               + "&p=" + STATS_INFO.preVerifyTime
-                               + "&u=" + STATS_INFO.url;
-                       var img = new Image;
-                       img.src = src;
-                   }
-                });
+    function V(e) {
+        if (e) {
+            for (var i = 0, n = e.length; i < n; ++i) {
+                var t = e[i],
+                    t = c[t];
+                t && (e[i] = t)
             }
+            return e
+        }
+    }
+
+    function x(e, i) {
+        if (!(!CONFIG_COPY.debug || i && i.isInnerInvoke)) {
+            var n = API_NAMES_REVERSE[e];
+            n && (e = n), i && i._complete && delete b._complete, console.log('"' + e + '",', i || "")
         }
     }
 
@@ -208,513 +542,15 @@
         return (new Date).getTime();
     }
 
-    function m (ready_callback) {
+    function A(ready_callback) {
         if (IS_MICRO_MESSENGER) {
-            if (a.WeixinJSBridge) {
+            if (r.WeixinJSBridge) {
                 ready_callback();
             } else {
-                if (q.addEventListener) {
-                    q.addEventListener("WeixinJSBridgeReady", ready_callback, false);
+                if (i.addEventListener) {
+                    i.addEventListener("WeixinJSBridgeReady", ready_callback, false);
                 }
             }
         }
-    }
-
-    // ** backdoor?
-    function beta() {
-        if (!H.invoke) {
-            H.invoke = function(b, c, d) {
-                a.WeixinJSBridge && WeixinJSBridge.invoke(b, e(c), d);
-            }
-            H.on = function(b, c) {
-                a.WeixinJSBridge && WeixinJSBridge.on(b, c);
-            }
-        }
-    }
-
-    var q,
-        r,
-        F,
-        G,
-        H;
-
-    if (!a.jWeixin) {
-      var API_NAMES = {
-          config: "preVerifyJSAPI",
-          onMenuShareTimeline: "menu:share:timeline",
-          onMenuShareAppMessage: "menu:share:appmessage",
-          onMenuShareQQ: "menu:share:qq",
-          onMenuShareWeibo: "menu:share:weiboApp",
-          onMenuShareQZone: "menu:share:QZone",
-          previewImage: "imagePreview",
-          getLocation: "geoLocation",
-          openProductSpecificView: "openProductViewWithPid",
-          addCard: "batchAddCard",
-          openCard: "batchViewCard",
-          chooseWXPay: "getBrandWCPayRequest"
-      };
-
-      var API_NAMES_REVERSE = (function() {
-          var names = {};
-          for (var key in API_NAMES) {
-              names[API_NAMES[key]] = key;
-          }
-          return names;
-      }());
-
-      q = a.document;
-      r = q.title;
-
-      var user_agent = navigator.userAgent.toLowerCase();                                   // => s
-      var t = navigator.platform.toLowerCase();                                             // => t
-      var u = !(!t.match("mac") && !t.match("win"));                                        // => u
-      var v = -1 != user_agent.indexOf("wxdebugger");                                       // => v
-      var IS_MICRO_MESSENGER = -1 != user_agent.indexOf("micromessenger");                  // => w
-      var IS_ANDROID = -1 != user_agent.indexOf("android");                                 // => x
-      var IS_IOS = -1 != user_agent.indexOf("iphone") || -1 != user_agent.indexOf("ipad");  // => y
-
-      var client_version = function() { // => z
-          var a = user_agent.match(/micromessenger\/(\d+\.\d+\.\d+)/) || user_agent.match(/micromessenger\/(\d+\.\d+)/);
-          return a ? a[1] : ""
-      }();
-
-      var A = false; // => A
-      var B = false; // => B
-
-      C = {
-          initStartTime: now(),
-          initEndTime: 0,
-          preVerifyStartTime: 0,
-          preVerifyEndTime: 0
-      };
-
-      var STATS_INFO = {
-          version: 1,
-          appId: "",
-          initTime: 0,
-          preVerifyTime: 0,
-          networkType: "",
-          preVerifyState: 1,
-          systemType: IS_IOS ? 1 : IS_ANDROID ? 2 : -1,
-          clientVersion: client_version,
-          url: encodeURIComponent(location.href)
-      };
-
-      var CONFIG_COPY = {};
-
-      var F = {
-          _completes: []
-      };
-
-      G = {
-          state: 0,
-          res: {}
-      };
-
-      m(function() {
-          C.initEndTime = now()
-      });
-
-      H = {
-          config: function(ORIG_CONF) {
-              CONFIG_COPY = ORIG_CONF;
-
-              // asserts {
-              if (!CONFIG_COPY.appId) {
-                alert('[assert]: appId is required');
-              }
-
-              if (!CONFIG_COPY.timestamp) {
-                alert('[assert]: timestamp is required');
-              }
-
-              if (!CONFIG_COPY.nonceStr) {
-                alert('[assert]: nonceStr is required');
-              }
-
-              if (!CONFIG_COPY.signature) {
-                alert('[assert]: signature is required');
-              }
-
-              if (!CONFIG_COPY.jsApiList || CONFIG_COPY.jsApiList.length === 0) {
-                alert('[assert]: jsApiList is required');
-              }
-              // } asserts
-
-              j("config", ORIG_CONF);
-
-              var b = true
-              if (CONFIG_COPY.check === false) {
-                b = false;
-              }
-
-              m(function() {
-                  var a, d, e;
-                  if (b) {
-                      c(
-                          API_NAMES.config,
-                          {
-                              verifyJsApiList: i(CONFIG_COPY.jsApiList)
-                          },
-                          function () {
-                              F._complete = function(res) {
-                                  C.preVerifyEndTime = now();
-                                  G.state = 1;
-                                  G.res = res;
-                              };
-                              F.success = function() {
-                                  STATS_INFO.preVerifyState = 0;
-                              };
-                              F.fail = function(err) {
-                                  F._fail ? F._fail(err) : G.state = -1
-                              };
-
-                              var a = F._completes;
-                              a.push(function () {
-                                  if (!CONFIG_COPY.debug) {
-                                      statsReport();
-                                  }
-                              });
-
-                              F.complete = function() {
-                                  for (var c = 0, d = a.length; d > c; ++c) a[c]();
-                                  F._completes = []
-                              };
-
-                              return F;
-                         }()
-                    );
-
-                    C.preVerifyStartTime = now();
-                } else {
-                    for (G.state = 1, a = F._completes, d = 0, e = a.length; e > d; ++d) a[d]();
-                    F._completes = []
-                }
-              });
-
-              CONFIG_COPY.beta && beta();
-          },
-          ready: function (callback) {
-              if (G.state != 0) {
-                  callback();
-              } else {
-                  F._completes.push(callback);
-                  if (!IS_MICRO_MESSENGER && CONFIG_COPY.debug) {
-                      callback();
-                  }
-              }
-          },
-          error: function(callback) {
-              if ("6.0.2" > client_version) {
-                  return;
-              } else {
-                  if (G.state == -1) {
-                      callback(G.res)
-                  } else {
-                      F._fail = callback;
-                  }
-              }
-          },
-          checkJsApi: function(a) {
-              var b = function(a) {
-                  var c, d, b = a.checkResult;
-                  for (c in b) d = API_NAMES_REVERSE[c], d && (b[d] = b[c], delete b[c]);
-                  return a
-              };
-              c("checkJsApi", {
-                  jsApiList: i(a.jsApiList)
-              }, function() {
-                  return a._complete = function(a) {
-                      if (IS_ANDROID) {
-                          var c = a.checkResult;
-                          c && (a.checkResult = JSON.parse(c))
-                      }
-                      a = b(a)
-                  }, a
-              }())
-          },
-          onMenuShareTimeline: function (call_conf) {
-              d(API_NAMES.onMenuShareTimeline, {
-                  complete: function() {
-                      c("shareTimeline", {
-                          title: call_conf.title || r, // ** document.title
-                          desc: call_conf.title || r,
-                          img_url: call_conf.imgUrl || "",
-                          link: call_conf.link || location.href
-                      }, call_conf)
-                  }
-              }, call_conf)
-          },
-          onMenuShareAppMessage: function (call_conf) {
-              d(API_NAMES.onMenuShareAppMessage, {
-                  complete: function() {
-                      c("sendAppMessage", {
-                          title: call_conf.title || r,
-                          desc: call_conf.desc || "",
-                          link: call_conf.link || location.href,
-                          img_url: call_conf.imgUrl || "",
-                          type: call_conf.type || "link",
-                          data_url: call_conf.dataUrl || ""
-                      }, call_conf)
-                  }
-              }, call_conf)
-          },
-          onMenuShareQQ: function(call_conf) {
-              d(API_NAMES.onMenuShareQQ, {
-                  complete: function() {
-                      c("shareQQ", {
-                          title: call_conf.title || r,
-                          desc: call_conf.desc || "",
-                          img_url: call_conf.imgUrl || "",
-                          link: call_conf.link || location.href
-                      }, call_conf)
-                  }
-              }, call_conf)
-          },
-          onMenuShareWeibo: function(call_conf) {
-              d(API_NAMES.onMenuShareWeibo, {
-                  complete: function() {
-                      c("shareWeiboApp", {
-                          title: call_conf.title || r,
-                          desc: call_conf.desc || "",
-                          img_url: call_conf.imgUrl || "",
-                          link: call_conf.link || location.href
-                      }, call_conf)
-                  }
-              }, call_conf)
-          },
-          onMenuShareQZone: function(a) {
-              d(API_NAMES.onMenuShareQZone, {
-                  complete: function() {
-                      c("shareQZone", {
-                          title: a.title || r,
-                          desc: a.desc || "",
-                          img_url: a.imgUrl || "",
-                          link: a.link || location.href
-                      }, a)
-                  }
-              }, a)
-          },
-
-          startRecord: function(a) {
-              c("startRecord", {}, a)
-          },
-          stopRecord: function(a) {
-              c("stopRecord", {}, a)
-          },
-          onVoiceRecordEnd: function(a) {
-              d("onVoiceRecordEnd", a)
-          },
-          playVoice: function(a) {
-              c("playVoice", {
-                  localId: a.localId
-              }, a)
-          },
-          pauseVoice: function(a) {
-              c("pauseVoice", {
-                  localId: a.localId
-              }, a)
-          },
-          stopVoice: function(a) {
-              c("stopVoice", {
-                  localId: a.localId
-              }, a)
-          },
-          onVoicePlayEnd: function(a) {
-              d("onVoicePlayEnd", a)
-          },
-          uploadVoice: function(a) {
-              c("uploadVoice", {
-                  localId: a.localId,
-                  isShowProgressTips: 0 == a.isShowProgressTips ? 0 : 1
-              }, a)
-          },
-          downloadVoice: function(a) {
-              c("downloadVoice", {
-                  serverId: a.serverId,
-                  isShowProgressTips: 0 == a.isShowProgressTips ? 0 : 1
-              }, a)
-          },
-          translateVoice: function(a) {
-              c("translateVoice", {
-                  localId: a.localId,
-                  isShowProgressTips: 0 == a.isShowProgressTips ? 0 : 1
-              }, a)
-          },
-          chooseImage: function(a) {
-              c("chooseImage", {
-                  scene: "1|2",
-                  count: a.count || 9,
-                  sizeType: a.sizeType || ["original", "compressed"],
-                  sourceType: a.sourceType || ["album", "camera"]
-              }, function() {
-                  return a._complete = function(a) {
-                      if (IS_ANDROID) {
-                          var b = a.localIds;
-                          b && (a.localIds = JSON.parse(b))
-                      }
-                  }, a
-              }())
-          },
-          previewImage: function(a) {
-              c(API_NAMES.previewImage, {
-                  current: a.current,
-                  urls: a.urls
-              }, a)
-          },
-          uploadImage: function(a) {
-              c("uploadImage", {
-                  localId: a.localId,
-                  isShowProgressTips: 0 == a.isShowProgressTips ? 0 : 1
-              }, a)
-          },
-          downloadImage: function(a) {
-              c("downloadImage", {
-                  serverId: a.serverId,
-                  isShowProgressTips: 0 == a.isShowProgressTips ? 0 : 1
-              }, a)
-          },
-          getNetworkType: function(a) {
-              var b = function(a) {
-                  var c, d, e, b = a.errMsg;
-                  if (a.errMsg = "getNetworkType:ok", c = a.subtype, delete a.subtype, c) a.networkType = c;
-                  else switch (d = b.indexOf(":"), e = b.substring(d + 1)) {
-                      case "wifi":
-                      case "edge":
-                      case "wwan":
-                          a.networkType = e;
-                          break;
-                      default:
-                          a.errMsg = "getNetworkType:fail"
-                  }
-                  return a
-              };
-              c("getNetworkType", {}, function() {
-                  return a._complete = function(a) {
-                      a = b(a)
-                  }, a
-              }())
-          },
-          openLocation: function(call_conf) {
-              c("openLocation", {
-                  latitude: call_conf.latitude,
-                  longitude: call_conf.longitude,
-                  name: call_conf.name || "",
-                  address: call_conf.address || "",
-                  scale: call_conf.scale || 28,
-                  infoUrl: call_conf.infoUrl || ""
-              }, call_conf)
-          },
-          getLocation: function(call_conf) {
-              call_conf = call_conf || {};
-              c(API_NAMES.getLocation, {
-                  // http://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84
-                  type: call_conf.type || "wgs84"
-              }, function() {
-                  call_conf._complete = function(a) {
-                      delete a.type
-                  }
-                  return call_conf
-              }())
-          },
-          hideOptionMenu: function(a) {
-              c("hideOptionMenu", {}, a)
-          },
-          showOptionMenu: function(a) {
-              c("showOptionMenu", {}, a)
-          },
-          closeWindow: function(a) {
-              a = a || {}, c("closeWindow", {
-                  immediate_close: a.immediateClose || 0
-              }, a)
-          },
-          hideMenuItems: function(a) {
-              c("hideMenuItems", {
-                  menuList: a.menuList
-              }, a)
-          },
-          showMenuItems: function(a) {
-              c("showMenuItems", {
-                  menuList: a.menuList
-              }, a)
-          },
-          hideAllNonBaseMenuItem: function(a) {
-              c("hideAllNonBaseMenuItem", {}, a)
-          },
-          showAllNonBaseMenuItem: function(a) {
-              c("showAllNonBaseMenuItem", {}, a)
-          },
-          scanQRCode: function(call_conf) {
-              call_conf = call_conf || {};
-              c("scanQRCode", {
-                  needResult: call_conf.needResult || 0,
-                  scanType: call_conf.scanType || ["qrCode", "barCode"]
-              }, function() {
-                  call_conf._complete = function(a) {
-                      var b, c;
-                      IS_IOS && (b = a.resultStr, b && (c = JSON.parse(b), a.resultStr = c && c.scan_code && c.scan_code.scan_result))
-                  }
-                  return call_conf
-              }())
-          },
-          openProductSpecificView: function(a) {
-              c(API_NAMES.openProductSpecificView, {
-                  pid: a.productId,
-                  view_type: a.viewType || 0,
-                  ext_info: a.extInfo
-              }, a)
-          },
-          addCard: function(a) {
-              var e, f, g, h, b = a.cardList,
-                  d = [];
-              for (e = 0, f = b.length; f > e; ++e) g = b[e], h = {
-                  card_id: g.cardId,
-                  card_ext: g.cardExt
-              }, d.push(h);
-              c(API_NAMES.addCard, {
-                  card_list: d
-              }, function() {
-                  return a._complete = function(a) {
-                      var c, d, e, b = a.card_list;
-                      if (b) {
-                          for (b = JSON.parse(b), c = 0, d = b.length; d > c; ++c) e = b[c], e.cardId = e.card_id, e.cardExt = e.card_ext, e.isSuccess = e.is_succ ? !0 : !1, delete e.card_id, delete e.card_ext, delete e.is_succ;
-                          a.cardList = b, delete a.card_list
-                      }
-                  }, a
-              }())
-          },
-          chooseCard: function(a) {
-              c("chooseCard", {
-                  app_id: CONFIG_COPY.appId,
-                  location_id: a.shopId || "",
-                  sign_type: a.signType || "SHA1",
-                  card_id: a.cardId || "",
-                  card_type: a.cardType || "",
-                  card_sign: a.cardSign,
-                  time_stamp: a.timestamp + "",
-                  nonce_str: a.nonceStr
-              }, function() {
-                  return a._complete = function(a) {
-                      a.cardList = a.choose_card_info, delete a.choose_card_info
-                  }, a
-              }())
-          },
-          openCard: function(a) {
-              var e, f, g, h, b = a.cardList,
-                  d = [];
-              for (e = 0, f = b.length; f > e; ++e) g = b[e], h = {
-                  card_id: g.cardId,
-                  code: g.code
-              }, d.push(h);
-              c(API_NAMES.openCard, {
-                  card_list: d
-              }, a)
-          },
-          chooseWXPay: function(a) {
-              c(API_NAMES.chooseWXPay, f(a), a)
-          }
-      }, b && (a.wx = a.jWeixin = H)
-
-      return H;
     }
 });
